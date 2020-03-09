@@ -62,7 +62,7 @@ class MainPage(webapp2.RequestHandler):
             'user': user,
             'url': url,
             'url_linktext': url_linktext,
-            'user_email': urllib.quote_plus(user_email),
+            'user_email': user_email,
         }
 
         template = JINJA_ENVIRONMENT.get_template('index.html')
@@ -82,7 +82,7 @@ class AddItem(webapp2.RequestHandler):
         item.content = self.request.get('content')
         item.put()
 
-        self.redirect('/?' + urllib.urlencode({'email': user_email}))
+        self.redirect('/')
 # [END additem]
 
 
@@ -106,37 +106,40 @@ class AddItem(webapp2.RequestHandler):
 #
 #         self.redirect('/?' + urllib.urlencode({'email': user_email}))
 # # [END deleteall]
-#
-#
-# # [START showall]
-# class ShowAll(webapp2.RequestHandler):
-#
-#     def get(self):
-#         items_query = Item.query().order(-Item.date)
-#         items = items_query.fetch()
-#
-#         user = users.get_current_user()
-#         url = users.create_logout_url(self.request.uri)
-#         url_linktext = 'Logout'
-#
-#
-#         template_values = {
-#             'items': items,
-#             'user': user,
-#             'url': url,
-#             'url_linktext': url_linktext,
-#         }
-#
-#         template = JINJA_ENVIRONMENT.get_template('index.html')
-#         self.response.write(template.render(template_values))
-# # [END showall]
+
+
+# [START showall]
+class ShowAll(webapp2.RequestHandler):
+
+    def get(self):
+        user = users.get_current_user()
+        user_email = user.email()
+
+        items_query = Item.query(ancestor=shoppinglist_key(user_email)).order(-Item.date)
+        items = items_query.fetch()
+
+        url = users.create_logout_url(self.request.uri)
+        url_linktext = 'Logout'
+
+        template_values = {
+            'items': items,
+            'user': user,
+            'url': url,
+            'url_linktext': url_linktext,
+            'user_email': user_email,
+        }
+
+        template = JINJA_ENVIRONMENT.get_template('index.html')
+        self.response.write(template.render(template_values))
+# [END showall]
+
 
 # [START app]
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/additem', AddItem),
+    ('/showall', ShowAll),
     # ('/deleteitem', DeleteItem),
     # ('/deleteall', DeleteAll),
-    # ('/showall', ShowAll),
 ], debug=True)
 # [END app]

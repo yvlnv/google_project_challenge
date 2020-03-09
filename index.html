@@ -18,6 +18,8 @@
           </button> -->
           <!-- <a class="brand" href="#">Minimalistic Shopping List App</a> -->
           <p>Minimalistic Shopping List App</p>
+          <hr>
+          <p>Welcome, {{ user_email }}! </p>
           <div class="nav-collapse collapse pull-right">
             <a href="{{ url|safe }}" class="btn">{{ url_linktext }}</a>
           </div>
@@ -31,13 +33,15 @@
       </div>
       {% endfor %}
       <!-- [END greetings] -->
-      <form action="/additem?" method="post">
+      <form action="/additem" method="post">
         <div><textarea name="content" class="input-block-level" rows="3"></textarea></div>
         <div><input type="submit" class="btn btn-large btn-primary" value="Add new item"></div>
       </form>
-      <button>Delete the shopping list</button>
-      </div>
+      <form action="/showall" method="get">
       <button>Show all items</button>
+      </form>
+      </div>
+      <button>Delete the shopping list</button>
       </div>
     </div>
     <div class="container">

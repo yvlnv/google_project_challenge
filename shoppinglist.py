@@ -1,19 +1,5 @@
 #!/usr/bin/env python
 
-# Copyright 2016 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 # [START imports]
 import os
 import urllib
@@ -36,18 +22,25 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 # will be consistent. However, the write rate should be limited to
 # ~1/second.
 
-# def guestbook_key(guestbook_name=DEFAULT_GUESTBOOK_NAME):
-#     """Constructs a Datastore key for a Guestbook entity.
-#     We use guestbook_name as the key.
-#     """
-#     return ndb.Key('Guestbook', guestbook_name)
+def shoppinglist_key(user_email):
+    """Constructs a Datastore key for a Shopping List entity.
+    We use user email address as the key.
+    """
+    return ndb.Key('Username', user_email)
 
 
 # [START item]
+class User(ndb.Model):
+    """Sub model for representing an user."""
+    email = ndb.StringProperty(indexed=False)
+    identity = ndb.StringProperty(indexed=False)
+
 
 class Item(ndb.Model):
     """A main model for representing an individual Shopping List item."""
+    user = ndb.StructuredProperty(User)
     content = ndb.StringProperty(indexed=False)
+    date = ndb.DateTimeProperty(auto_now_add=True)
 # [END item]
 
 
@@ -56,17 +49,20 @@ class MainPage(webapp2.RequestHandler):
 
     def get(self):
         user = users.get_current_user()
-        if user:
-            url = users.create_logout_url(self.request.uri)
-            url_linktext = 'Logout'
-        else:
-            url = users.create_login_url(self.request.uri)
-            url_linktext = 'Login'
+        user_email = user.email()
+
+        items_query = Item.query(ancestor=shoppinglist_key(user_email)).order(-Item.date)
+        items = items_query.fetch(10)
+
+        url = users.create_logout_url(self.request.uri)
+        url_linktext = 'Logout'
 
         template_values = {
+            'items': items,
             'user': user,
             'url': url,
             'url_linktext': url_linktext,
+            'user_email': urllib.quote_plus(user_email),
         }
 
         template = JINJA_ENVIRONMENT.get_template('index.html')
@@ -74,8 +70,73 @@ class MainPage(webapp2.RequestHandler):
 # [END main_page]
 
 
+# [START additem]
+class AddItem(webapp2.RequestHandler):
+
+    def post(self):
+        user_email = users.get_current_user().email()
+        item = Item(parent=shoppinglist_key(user_email))
+        item.user = User(
+                    identity=users.get_current_user().user_id(),
+                    email=users.get_current_user().email())
+        item.content = self.request.get('content')
+        item.put()
+
+        self.redirect('/?' + urllib.urlencode({'email': user_email}))
+# [END additem]
+
+
+# # [START deleteitem]
+# class DeleteItem(webapp2.RequestHandler):
+#
+#     def post(self):
+#         item = Item()
+#         item.content = self.request.get('content')
+#
+# # [END deleteitem]
+#
+#
+# # [START deleteall]
+# class DeleteAll(webapp2.RequestHandler):
+#
+#     def post(self):
+#         item = Item()
+#         item.content = self.request.get('content')
+#         item.put()
+#
+#         self.redirect('/?' + urllib.urlencode({'email': user_email}))
+# # [END deleteall]
+#
+#
+# # [START showall]
+# class ShowAll(webapp2.RequestHandler):
+#
+#     def get(self):
+#         items_query = Item.query().order(-Item.date)
+#         items = items_query.fetch()
+#
+#         user = users.get_current_user()
+#         url = users.create_logout_url(self.request.uri)
+#         url_linktext = 'Logout'
+#
+#
+#         template_values = {
+#             'items': items,
+#             'user': user,
+#             'url': url,
+#             'url_linktext': url_linktext,
+#         }
+#
+#         template = JINJA_ENVIRONMENT.get_template('index.html')
+#         self.response.write(template.render(template_values))
+# # [END showall]
+
 # [START app]
 app = webapp2.WSGIApplication([
     ('/', MainPage),
+    ('/additem', AddItem),
+    # ('/deleteitem', DeleteItem),
+    # ('/deleteall', DeleteAll),
+    # ('/showall', ShowAll),
 ], debug=True)
 # [END app]

@@ -15,12 +15,29 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
-          </button>
-          <a class="brand" href="#">App Engine Shopping List</a> -->
+          </button> -->
+          <!-- <a class="brand" href="#">Minimalistic Shopping List App</a> -->
+          <p>Minimalistic Shopping List App</p>
           <div class="nav-collapse collapse pull-right">
             <a href="{{ url|safe }}" class="btn">{{ url_linktext }}</a>
           </div>
-        </div>
+          <hr>
+            <!-- [START greetings] -->
+      {% for item in items %}
+      <div class="row">
+        <blockquote> {{ item.content }}
+        <button class="clsActionButton" id="idDeleteButton" onclick="idDeleteButton_onclick();">Delete</button></blockquote>
+        <hr>
+      </div>
+      {% endfor %}
+      <!-- [END greetings] -->
+      <form action="/additem?" method="post">
+        <div><textarea name="content" class="input-block-level" rows="3"></textarea></div>
+        <div><input type="submit" class="btn btn-large btn-primary" value="Add new item"></div>
+      </form>
+      <button>Delete the shopping list</button>
+      </div>
+      <button>Show all items</button>
       </div>
     </div>
     <div class="container">

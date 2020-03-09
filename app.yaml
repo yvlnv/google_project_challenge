@@ -5,9 +5,6 @@ threadsafe: true
 # [START handlers]
 handlers:
 
-# - url: /bootstrap
-#   static_dir: bootstrap
-
 - url: /.*
   script: shoppinglist.app
   login: required

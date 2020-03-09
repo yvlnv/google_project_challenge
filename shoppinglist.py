@@ -51,7 +51,7 @@ class MainPage(webapp2.RequestHandler):
         user = users.get_current_user()
         user_email = user.email()
 
-        items_query = Item.query(ancestor=shoppinglist_key(user_email)).order(-Item.date)
+        items_query = Item.query(ancestor=shoppinglist_key(user_email)).order(Item.date)
         items = items_query.fetch(10)
 
         url = users.create_logout_url(self.request.uri)
@@ -80,7 +80,8 @@ class AddItem(webapp2.RequestHandler):
                     identity=users.get_current_user().user_id(),
                     email=users.get_current_user().email())
         item.content = self.request.get('content')
-        item.put()
+        if len(item.content) > 0:
+            item.put()
 
         self.redirect('/')
 # [END additem]
@@ -90,22 +91,22 @@ class AddItem(webapp2.RequestHandler):
 # class DeleteItem(webapp2.RequestHandler):
 #
 #     def post(self):
-#         item = Item()
-#         item.content = self.request.get('content')
+#         item.key.delete()
 #
+#         self.redirect('/')
 # # [END deleteitem]
-#
-#
-# # [START deleteall]
-# class DeleteAll(webapp2.RequestHandler):
-#
-#     def post(self):
-#         item = Item()
-#         item.content = self.request.get('content')
-#         item.put()
-#
-#         self.redirect('/?' + urllib.urlencode({'email': user_email}))
-# # [END deleteall]
+
+
+# [START deleteall]
+class DeleteAll(webapp2.RequestHandler):
+
+    def post(self):
+        user_email = users.get_current_user().email()
+        items_query = Item.query(ancestor=shoppinglist_key(user_email)).fetch(keys_only=True)
+        ndb.delete_multi(items_query)
+
+        self.redirect('/')
+# [END deleteall]
 
 
 # [START showall]
@@ -113,9 +114,9 @@ class ShowAll(webapp2.RequestHandler):
 
     def get(self):
         user = users.get_current_user()
-        user_email = user.email()
+        user_email = users.get_current_user().email()
 
-        items_query = Item.query(ancestor=shoppinglist_key(user_email)).order(-Item.date)
+        items_query = Item.query(ancestor=shoppinglist_key(user_email)).order(Item.date)
         items = items_query.fetch()
 
         url = users.create_logout_url(self.request.uri)
@@ -140,6 +141,6 @@ app = webapp2.WSGIApplication([
     ('/additem', AddItem),
     ('/showall', ShowAll),
     # ('/deleteitem', DeleteItem),
-    # ('/deleteall', DeleteAll),
+    ('/deleteall', DeleteAll),
 ], debug=True)
 # [END app]

@@ -1,57 +1,90 @@
-<!DOCTYPE html>
-{% autoescape true %}
+<!DOCTYPE html> {% autoescape true %}
 <html>
-  <head>
-    <!-- [START css] -->
-    <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap.css">
-    <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap-responsive.css">
-    <!-- [END css] -->
-  </head>
-  <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-<!--           <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button> -->
-          <!-- <a class="brand" href="#">Minimalistic Shopping List App</a> -->
-          <p>Minimalistic Shopping List App</p>
-          <hr>
-          <p>Welcome, {{ user_email }}! </p>
-          <div class="nav-collapse collapse pull-right">
-            <a href="{{ url|safe }}" class="btn">{{ url_linktext }}</a>
-          </div>
-          <hr>
+   <body>
+      <div class="navbar navbar-inverse navbar-fixed-top">
+         <div class="container">
+            <div style="background-color:darkgrey;color:white;padding:15px;">
+               <p style="
+                  font-size: 28px;
+                  font-weight: bold;
+                  font-family: Arial, Helvetica, sans-serif;
+                  ">Minimalistic Shopping List App</p>
+            </div>
+            <hr>
+            <p>Welcome, {{ user_email }}! </p>
+            <div class="nav-collapse collapse pull-right">
+               <a href="{{ url|safe }}" class="btn">{{ url_linktext }}</a>
+            </div>
+            <hr>
             <!-- [START Items] -->
-      {% for item in items %}
-      <div class="row">
-        <blockquote> {{ item.content }}
-          <form action="/deleteitem" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="k" value="{{item.key.urlsafe()}}" />
-                <input type="submit" value="Delete"></form>
-        <!-- <form action="/deleteitem" method="post"><button>Delete</button> -->
-      </blockquote>
-        <hr>
+            {% for item in items %}
+            <div class="row">
+               <blockquote>
+                  <form action="/deleteitem" method="POST" enctype="multipart/form-data">
+                     <input type="hidden" name="k" value="{{item.key.urlsafe()}}" /> <input type="submit" value="Delete" style="
+                        background-color: darkgrey;
+                        color: white;
+                        text-align: center;
+                        text-decoration: none;
+                        display: inline-block;
+                        font-size: 16px;
+                        border-radius: 2px;
+                        width: 80px;
+                        "> {{ item.content }}
+                  </form>
+               </blockquote>
+               <hr>
+            </div>
+            {% endfor %}
+            <!-- [END Items] -->
+            <form action="/additem" method="post" style="margin-bottom: 24px;">
+               <input type="text" name="content" class="input-block-level" rows="3" style="
+                  width: 300px;
+                  height: 34px;
+                  padding: 7px;
+                  ">
+               <input type="submit" class="btn btn-large btn-primary" value="Add new item" style="
+                  background-color: darkgrey;
+                  color: white;
+                  padding: 15px 30px;
+                  text-align: center;
+                  text-decoration: none;
+                  display: inline-block;
+                  font-size: 16px;
+                  border-radius: 2px;
+                  width: 200px;
+                  ">
+            </form>
+            <form action="/showall" method="get">
+               <button style="
+                  background-color: darkgrey;
+                  color: white;
+                  padding: 15px 30px;
+                  text-align: center;
+                  text-decoration: none;
+                  display: inline-block;
+                  font-size: 16px;
+                  border-radius: 2px;
+                  width: 200px;
+                  ">Show all items</button>
+            </form>
+            <form action="/deleteall" method="post">
+               <button style="
+                  background-color: darkgrey;
+                  color: white;
+                  padding: 15px 10px;
+                  text-align: center;
+                  text-decoration: none;
+                  display: inline-block;
+                  font-size: 16px;
+                  border-radius: 2px;
+                  width: 200px;
+                  ">Delete the shopping list</button>
+            </form>
+         </div>
       </div>
-      {% endfor %}
-      <!-- [END Items] -->
-      <form action="/additem" method="post">
-        <div><textarea name="content" class="input-block-level" rows="3"></textarea></div>
-        <div><input type="submit" class="btn btn-large btn-primary" value="Add new item"></div>
-      </form>
-      <form action="/showall" method="get">
-      <button>Show all items</button>
-      </form>
+      <div class="container">
       </div>
-      <form action="/deleteall" method="post">
-      <button>Delete the shopping list</button>
-      </form>
-      </div>
-    </div>
-    <div class="container">
-    </div>
-  </body>
+   </body>
 </html>
 {% endautoescape %}

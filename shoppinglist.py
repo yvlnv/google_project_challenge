@@ -46,8 +46,8 @@ class MainPage(webapp2.RequestHandler):
         user = users.get_current_user()
         user_email = user.email()
 
-        items_query = Item.query(ancestor=shoppinglist_key(user_email)).order(Item.date)
-        items = items_query.fetch(10)
+        items_query = Item.query(ancestor=shoppinglist_key(user_email)).order(-Item.date)
+        items = items_query.fetch(10)[::-1]
 
         url = users.create_logout_url(self.request.uri)
         url_linktext = 'Logout'

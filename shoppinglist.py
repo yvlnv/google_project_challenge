@@ -17,11 +17,6 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 # [END imports]
 
 
-# We set a parent key on the 'Greetings' to ensure that they are all
-# in the same entity group. Queries across the single entity group
-# will be consistent. However, the write rate should be limited to
-# ~1/second.
-
 def shoppinglist_key(user_email):
     """Constructs a Datastore key for a Shopping List entity.
     We use user email address as the key.
@@ -87,28 +82,6 @@ class AddItem(webapp2.RequestHandler):
 # [END additem]
 
 
-# # [START deleteitem]
-# class DeleteItem(webapp2.RequestHandler):
-#
-#     def post(self):
-#         item.key.delete()
-#
-#         self.redirect('/')
-# # [END deleteitem]
-
-
-# [START deleteall]
-class DeleteAll(webapp2.RequestHandler):
-
-    def post(self):
-        user_email = users.get_current_user().email()
-        items_query = Item.query(ancestor=shoppinglist_key(user_email)).fetch(keys_only=True)
-        ndb.delete_multi(items_query)
-
-        self.redirect('/')
-# [END deleteall]
-
-
 # [START showall]
 class ShowAll(webapp2.RequestHandler):
 
@@ -135,12 +108,36 @@ class ShowAll(webapp2.RequestHandler):
 # [END showall]
 
 
+# [START deleteitem]
+class DeleteItem(webapp2.RequestHandler):
+
+    def post(self):
+        safe_key = self.request.get('k')
+        key = ndb.Key(urlsafe=safe_key)
+        key.delete()
+
+        self.redirect('/')
+# [END deleteitem]
+
+
+# [START deleteall]
+class DeleteAll(webapp2.RequestHandler):
+
+    def post(self):
+        user_email = users.get_current_user().email()
+        items_query = Item.query(ancestor=shoppinglist_key(user_email)).fetch(keys_only=True)
+        ndb.delete_multi(items_query)
+
+        self.redirect('/')
+# [END deleteall]
+
+
 # [START app]
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/additem', AddItem),
     ('/showall', ShowAll),
-    # ('/deleteitem', DeleteItem),
+    ('/deleteitem', DeleteItem),
     ('/deleteall', DeleteAll),
 ], debug=True)
 # [END app]

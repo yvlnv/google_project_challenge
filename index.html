@@ -24,15 +24,19 @@
             <a href="{{ url|safe }}" class="btn">{{ url_linktext }}</a>
           </div>
           <hr>
-            <!-- [START greetings] -->
+            <!-- [START Items] -->
       {% for item in items %}
       <div class="row">
         <blockquote> {{ item.content }}
-        <button class="clsActionButton" id="idDeleteButton" onclick="idDeleteButton_onclick();">Delete</button></blockquote>
+          <form action="/deleteitem" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="k" value="{{item.key.urlsafe()}}" />
+                <input type="submit" value="Delete"></form>
+        <!-- <form action="/deleteitem" method="post"><button>Delete</button> -->
+      </blockquote>
         <hr>
       </div>
       {% endfor %}
-      <!-- [END greetings] -->
+      <!-- [END Items] -->
       <form action="/additem" method="post">
         <div><textarea name="content" class="input-block-level" rows="3"></textarea></div>
         <div><input type="submit" class="btn btn-large btn-primary" value="Add new item"></div>
